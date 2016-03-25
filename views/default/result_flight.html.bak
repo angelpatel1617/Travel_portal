@@ -1,0 +1,69 @@
+{{extend 'layout.html'}}
+<head>
+<style>
+    #data_table thead th , #data_table tr td{
+        text-align:center;
+        padding:10px 10px;
+       
+        
+       
+    }
+    #data_table tr td{
+        background-color:#ffffff;
+          
+            
+           
+        
+        
+    }
+    
+    #data_table{
+        border-radius:8px 8px 8px 8px;
+        width:100%;
+                box-shadow: 1px 1px 5px #888888;border-radius:8px 8px 8px 8px;
+
+        
+    }
+    .bookbutton{
+        border-radius:0;
+        box-shadow: 1px 1px 5px #888888;
+        
+    }
+    
+    .backbutton{
+        border-radius:0;
+        box-shadow: 1px 1px 5px #888888;
+    }
+    
+    </style>
+</head>
+<body class="innerbody">
+<table id="data_table" cellspacing="10" cellpadding="10" class="" style="font-size:120%;background-color:#eeeeee;color:#000000;">
+    <caption><h3 style="background-color:lightgrey">Search Results</h3></span></caption>
+<thead>
+<th>Logo</th>
+<th>Airline name</th>
+<th>Departure Time</th>
+<th>Arrival time</th>
+<th>Fare</th>
+    <th>Submit</th>
+    </thead>
+
+
+{{for i in range(len(sid)):}}
+	<tr>
+    <td><img src='{{=URL("download", args=slogo[i])}}' width=50px height=50px></td>
+	<td>{{=scompany[i]}}<br/>{{=sid[i]}}</td>
+        <td>{{=sdtime[i].strftime("%I:%M %p %a ")}}</td>
+	<td>{{=satime[i].strftime("%I:%M %p %a ")}}</td>
+	<td>{{=request.args(3)}} * {{=sfare[i]}} = {{=int(request.args(3))*(int)(sfare[i])}}</td>
+	<td><a href="{{=URL(f='confirm',vars=dict(seats=request.args(3),sdate=sdate[i],scompany=scompany[i],sid=sid[i],sdtime=sdtime[i],satime=satime[i],sfare=int(request.args(3))*int(sfare[i]),ssrc=request.args(0),sdest=request.args(1),sclass=request.args(4)))}}"><button type="button" class="btn btn-info">Book</button></a></td>
+	</tr>
+	<tr><td colspan="7"><hr/>
+        </td>    </tr>
+
+{{pass}}
+</table>
+<br/>
+<a href="{{=URL('default','search_flight')}}"><button type="button" class="backbutton">Back</button></a>
+</body>

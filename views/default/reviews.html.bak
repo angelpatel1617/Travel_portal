@@ -1,0 +1,10 @@
+{{extend 'layout.html'}}
+<h2><b>
+    {{=post.title}}
+    </b></h2>
+<i>Posted on {{=post.created_on}} by {{=post.created_by.first_name}} {{=post.created_by.last_name}}</i>
+<p><br>
+    {{=post.body}}
+</p>
+<br/>
+<a href="{{=URL('default','review')}}"><button type=button>Back</button></a>

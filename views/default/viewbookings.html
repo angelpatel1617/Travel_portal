@@ -1,0 +1,119 @@
+{{extend 'layout.html'}}
+<head>
+    <style>
+        .Prevbook{
+            width:100%;
+            box-shadow:0px 0px 4px #bbbbbb;
+        }
+        .Prevbook caption{
+            font-size:16px;
+            padding-bottom:4px;
+            font-weight:bold;
+        }
+        .Prevbook tr:nth-child(1) td{
+            font-weight:bold;
+            background-color:#bbbbbb;
+            font-size:16px;
+        }
+        .Prevbook tr td{
+            text-align:center;
+        }
+        .notify{
+            text-align:center;
+            font-size:16px;
+        }
+    </style>
+</head>
+
+<br/>
+<br/>
+<div>
+<center><h3><span style="text-align:center;color:#139">Flight Bookings</span></h3></center>
+{{if (f==0):}}
+<table class="Prevbook" cellpadding='6'>
+<caption>Previous Bookings</caption>
+<tr>
+<td>Flight Name</td>
+<td>Date</td>
+<td>Arrival Time</td>
+<td>Departure time</td>
+<td>Class</td>
+<td>Price</td>
+<td>Source</td>
+<td>Destination</td>
+    <td>Number of Seats
+    </td>
+
+</tr>
+
+{{pass}}
+{{if f==1:}}
+<span class="notify">
+    No previous  bookings
+    </span>
+{{pass}}
+{{for i in range(len(flight)):}}
+{{if ((flight[i]['d']-d1)<(datetime.timedelta(0))):}}
+<tr>
+<td>{{=flight[i]['company']}}</td>
+<td>{{=flight[i]['d']}}</td>
+    <td>{{=(flight[i]['arrival']).strftime('%I:%M %p')}}</td>
+    <td>{{=flight[i]['depart'].strftime("%I:%M %p")}}</td>
+<td>{{=flight[i]['cl']}}</td>
+<td>{{=flight[i]['price']}}</td>
+<td>{{=flight[i]['src']}}</td>
+<td>{{=flight[i]['dest']}}</td>
+<td>{{=flight[i]['num']}}</td>    
+
+</tr>
+<br>
+<br>
+{{pass}}
+{{pass}}
+</table>
+<br>
+<br>
+<br>
+{{if flag==0:}}
+<table cellpadding='6' class="Prevbook">
+    <caption>Scheduled Bookings</caption>
+<tr>
+<td>Flight Name</td>
+<td>Date</td>
+<td>Arrival Time</td>
+<td>Departure time</td>
+<td>Class</td>
+<td>Price</td>
+<td>Source</td>
+<td>Destination</td>
+    <td>Number of seats</td>
+
+<td></td>
+    </tr>
+{{pass}}
+{{if flag==1:}}
+No future bookings
+{{pass}}
+{{for i in range(len(flight)):}}
+{{if ((flight[i]['d']-d1)>=datetime.timedelta(0)):}}
+<tr>
+<td>{{=flight[i]['company']}}</td>
+<td>{{=flight[i]['d'].strftime("%d %b %Y")}}</td>
+<td>{{=(flight[i]['arrival']).strftime("%I:%M %p")}}</td>
+<td>{{=flight[i]['depart'].strftime("%I:%M %p")}}</td>
+<td>{{=flight[i]['cl']}}</td>
+<td>{{=flight[i]['price']}}</td>
+<td>{{=flight[i]['src']}}</td>
+<td>{{=flight[i]['dest']}}</td>
+<td>{{=flight[i]['num']}}</td>
+
+<td>
+<a href="{{=URL('cancels', args=(flight[i]['id'],flight[i]['lis'],flight[i]['num'],flight[i]['company'],flight[i]['cl'],flight[i]['src'],flight[i]['dest']))}}"><button >CANCEL</button></a></td>
+</tr>
+{{pass}}
+{{pass}}
+</table>
+</div>
+<br>
+<br>
+<a href="{{=URL('default','index')}}"><button type=button>Back</button></a>

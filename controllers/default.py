@@ -1,0 +1,232 @@
+# -*- coding: utf-8 -*-
+# this file is released under public domain and you can use without limitations
+
+#########################################################################
+## This is a sample controller
+## - index is the default action of any application
+## - user is required for authentication and authorization
+## - download is for downloading files uploaded in the db (does streaming)
+#########################################################################
+
+def download():
+    """
+    allows downloading of uploaded files
+    http://..../[app]/default/download/[filename]
+    """
+    return response.download(request,db)
+
+
+def index():
+    """
+    example action using the internationalization operator T and flash
+    rendered by views/default/index.html or views/generic.html
+
+    if you need a simple wiki simply replace the two lines below with:
+    return auth.wiki()
+    """
+    response.flash = T("Hello World")
+    return dict(message=T('Welcome to web2py!'))
+
+import datetime
+def search_flight():
+        form=SQLFORM.factory(
+			Field('From',requires=IS_IN_DB(db,db.places.body)),
+			Field('To',requires=IS_IN_DB(db,db.places.body)),
+			Field('d','date',label='Departure (Date)',requires=IS_DATE()),
+			Field('d1','date',label='Arrival (Date)'),
+			Field('Class',requires=IS_IN_SET(['Business','Economy'])),
+			Field('seats',label='Number of passengers',requires=IS_IN_SET((1,2,3,4,5,6))))
+        form.add_button('Back',URL('index'))
+        if form.accepts(request.vars,session):
+                if form.vars.From == form.vars.To:
+                        session.flash="Source and Destination should not be the same!"
+                        redirect(URL('default','search_flight'))
+                elif form.vars.d<datetime.date.today():
+                        session.flash="Enter a valid date!"
+                        redirect(URL('default','search_flight'))
+                elif form.vars.d1 and form.vars.d1 < form.vars.d:
+                        session.flash='Invalid Input'
+                        redirect(URL('default','search_flight'))
+                elif form.vars.d1 and form.vars.d1 >= form.vars.d:
+                        session.seats=request.vars.seats
+                        session.date=request.vars.d
+                        session.date2=request.vars.d1
+                        redirect(URL('round_search',args=(request.vars.From,request.vars.To,request.vars.d,request.vars.seats,request.vars.Class,request.vars.d1)))
+                else:
+                        session.seats=request.vars.seats
+                        session.date=request.vars.d
+                        redirect(URL('result_flight',args=(request.vars.From,request.vars.To,request.vars.d,request.vars.seats,request.vars.Class)))
+        return dict(form=form)
+
+def retday(x):
+        days=datetime.datetime(int(x[:4]),int(x[5:7]),int(x[8:10])).isoweekday()
+        return days
+
+def result_flight():
+        session.date=request.args(2)
+        days=retday(request.args(2))
+        lis=db((db.flights.src==request.args(0)) & (db.flights.dest==request.args(1))).select(db.flights.ALL)
+        sid=[]
+        ssrc=[]
+        sdest=[]
+        sfare=[]
+        sclass=[]
+        sname=[]
+        satime=[]
+        sdtime=[]
+        scompany=[]
+        slogo=[]
+        for l in lis:
+                if db.flights[l.id].day_of_flight.isoweekday()==days:
+                        sid.append(db.flights[l.id].flight_id)
+                        ssrc.append(db.flights[l.id].src)
+                        sdest.append(db.flights[l.id].dest)
+                        scompany.append(db.flights[l.id].company)
+                        sfare.append(db.flights[l.id].fare)
+                        #sdate.append(str(db.flights[l.id].day_of_flight)[:10])
+                        sclass.append(db.flights[l.id].class_type)
+                        satime.append(db.flights[l.id].atime)
+                        sdtime.append(db.flights[l.id].dtime)
+                        slogo.append(db.flights[l.id].logo)
+        return dict(sid=sid,ssrc=ssrc,sdest=sdest,sfare=sfare,sclass=sclass,sdtime=sdtime,satime=satime,scompany=scompany,slogo=slogo)
+
+def confirm():
+    return dict()
+
+@auth.requires_login()
+def book():
+        db.flight_bookings.insert(user_id=auth.user.id,num=request.vars.seats,d=session.date,arrival=request.vars.satime,depart=request.vars.sdtime,lis=request.vars.sid,price=request.vars.sfare,src=request.vars.ssrc,dest=request.vars.sdest,cl=request.vars.sclass,company=request.vars.scompany)
+	session.flash="Your ticket has been booked!"
+	redirect(URL('index'))
+
+@auth.requires_login()
+def cancels():
+        db(db.flight_bookings.id==int(request.args[0])).delete()
+        redirect(URL('default','viewbookings'))
+
+
+@auth.requires_login()
+def viewbookings():
+        print auth.user.id
+        ctr=0
+        c=0
+        import datetime
+        d1=datetime.date.today()
+        flag=0
+        f=0
+        flight=db(db.flight_bookings.user_id==auth.user.id).select(db.flight_bookings.ALL,orderby=db.flight_bookings.d)
+        for i in range(len(flight)):
+                if ((flight[i]['d']-d1)<datetime.timedelta(0)):
+                        ctr=ctr+1 
+                if ((flight[i]['d']-d1)>=datetime.timedelta(0)):
+                        c=c+1
+        if (ctr==len(flight)):
+                flag=1
+        if (c==len(flight)):
+                f=1
+        return locals()
+
+
+
+def search_train():
+	form=SQLFORM.factory(
+			Field('From',requires=IS_IN_DB(db,db.places.body)),
+			Field('To',requires=IS_IN_DB(db,db.places.body)),
+			Field('d','datetime',label='Departure (Date)',requires=IS_DATETIME()),
+			Field('Class',requires=IS_IN_SET(['1A','2A','3A','SL','CC'])),
+			Field('seats','integer',label='Number of passengers',requires=IS_IN_SET((1,2,3,4,5,6))))
+	if form.accepts(request.vars,session):
+		if form.vars.From == form.vars.To:
+			session.flash="Source and Destination should not be the same!"
+			redirect(URL('default','search_train'))
+		elif form.vars.d.date()<datetime.date.today():
+			session.flash="Enter a valid date!"
+			redirect(URL('default','search_train'))
+		else:
+			session.seats=request.vars.seats
+			session.date=request.vars.d.date()
+			redirect(URL('searcht',args=(request.vars.From,request.vars.To,request.vars.d,request.vars.seats,request.vars.Class)))
+	session.var=1
+	return dict(form=form)
+
+
+
+def review():
+    rows= db(db.review).select(orderby=~db.review.created_on)
+    return locals()
+
+@auth.requires_login()
+def creview():
+    form= SQLFORM(db.review).process()
+    form.add_button('Back',URL('index'))
+    if form.accepted:
+        session.flash='Thank you for Review'
+        redirect(URL('default','review'))
+    return locals()
+
+@auth.requires_membership('managers')
+def manage_places():
+    places_grid=SQLFORM.grid(db.places)
+    return locals()
+
+@auth.requires_membership('managers')
+def manage_train():
+    train_grid=SQLFORM.grid(db.trains)
+    return locals()
+
+@auth.requires_membership('managers')
+def manage_users():
+        grid = SQLFORM.grid(db.auth_user,user_signature=False)
+        return locals()
+
+
+@auth.requires_membership('managers')
+def manage_flight():
+    flight_grid=SQLFORM.grid(db.flights)
+    return locals()
+
+
+@auth.requires_membership('managers')
+def manage_review():
+    review_grid=SQLFORM.grid(db.review)
+    return locals()
+
+def reviews():
+    post=db.review(request.args(0,cast=int))
+    return locals()
+
+def user():
+    """
+    exposes:
+    http://..../[app]/default/user/login
+    http://..../[app]/default/user/logout
+    http://..../[app]/default/user/register
+    http://..../[app]/default/user/profile
+    http://..../[app]/default/user/retrieve_password
+    http://..../[app]/default/user/change_password
+    http://..../[app]/default/user/manage_users (requires membership in
+    use @auth.requires_login()
+        @auth.requires_membership('group name')
+        @auth.requires_permission('read','table name',record_id)
+    to decorate functions that need access control
+    """
+    return dict(form=auth())
+
+
+@cache.action()
+def download():
+    """
+    allows downloading of uploaded files
+    http://..../[app]/default/download/[filename]
+    """
+    return response.download(request, db)
+
+
+def call():
+    """
+    exposes services. for example:
+    http://..../[app]/default/call/jsonrpc
+    decorate with @services.jsonrpc the functions to expose
+    supports xml, json, xmlrpc, jsonrpc, amfrpc, rss, csv
+    """
+    return service()

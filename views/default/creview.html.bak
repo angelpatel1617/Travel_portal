@@ -1,0 +1,7 @@
+{{extend 'layout.html'}}
+<h2>
+    Write a Review
+</h2>
+{{=form}}
+<br/>
+<a href="{{=URL('default','index')}}"><button type=button>Back</button></a>

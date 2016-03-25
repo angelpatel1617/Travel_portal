@@ -1,0 +1,49 @@
+{{extend 'layout.html'}}
+<head>
+	<style>
+        .mytable{
+                        
+            font-size:140%;
+            border:1px solid black;    
+            background-color:#359;
+            border-spacing:10px;
+            border-collapse:separate;
+            color:#fff;
+            border-radius:8px 8px;
+            
+            }
+        .mytable caption{
+            padding:50px;
+            color:#666;
+            font-weight:bold;
+            padding-bottom:4px;
+        }
+    </style>
+</head>
+
+
+<table class="mytable">
+<caption>Booking Confirmation</caption>
+<tr>
+<td>
+    <b>Flight Name:</b></td><td>{{=request.vars.scompany}}</td></tr>
+    <tr><td>
+    <b>Flight id : </b></td><td>{{=request.vars.sid}}</td></tr>
+    <tr>
+<tr>
+<td>
+    <b>Date : </b></td><td>{{=session.date}}</td></tr>
+    <tr>
+        <td><b>Departure time : </b></td><td>{{=request.vars.sdtime}}</td>
+    </tr><tr><td>
+<b>Arrival time : </b></td><td>{{=request.vars.satime}}
+</td>
+</tr>
+    <tr><td>
+    <b>No. of Passengers : </b></td><td>{{=request.vars.seats}}</td></tr>
+<tr><td>
+    <b>Price : </b></td><td>{{=request.vars.sfare}}<td/></tr><tr><td>
+</table>
+    <br/>
+    <a href="{{=URL('default','search_flight')}}"><button type="button" >Back</button></a>
+<a href="{{=URL(f='book',vars=dict(scompany=request.vars.scompany,sdate=request.vars.sdate,sid=request.vars.sid,sdtime=request.vars.sdtime,satime=request.vars.satime,seats=request.vars.seats,sfare=request.vars.sfare,ssrc=request.vars.ssrc,sdest=request.vars.sdest,sclass=request.vars.sclass))}}"><button type="button" class="btn btn-primary">Confirm</button></a>
